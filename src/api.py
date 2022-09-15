@@ -235,7 +235,7 @@ async def graph_feature(client_id: int, feature: str):
 
 
 # Lancement de l'API par exécution du fichier python
-import uvicorn
-if __name__ == '__main__':
-    uvicorn.run("api:app", reload=True)  # pour fonctionnement par défaut
+#import uvicorn
+#if __name__ == '__main__':
+    #uvicorn.run("api:app", reload=False)  # pour fonctionnement par défaut
     #uvicorn.run("api:app", host='0.0.0.0', port=8000, reload=False)  # pour fonctionnement dans conteneur
