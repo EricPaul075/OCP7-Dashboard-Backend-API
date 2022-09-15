@@ -19,7 +19,7 @@ import os
 # Variables globales
 #cwd = os.getcwd()
 #data_path = cwd + '/../data/'
-data_path = '../data/'
+data_path = './data/'
 tmp = data_path + 'tmp/'
 if not os.path.exists(tmp):
     os.makedirs(tmp)
