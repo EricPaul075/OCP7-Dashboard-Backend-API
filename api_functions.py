@@ -75,8 +75,8 @@ def get_feature_list(fl_wf, fl_abc, fl_curr_app_abc, fl_prev_app_abc,
         - 'all': toutes les features.
     :return: list, liste des features raffinées.
     """
-    print("fl_prev_app_abc", fl_prev_app_abc[:10])
-    print("fl_curr_app_abc", fl_curr_app_abc[:10])
+    if is_wf and fl_wf is None:
+        return []
     if filter=='current':
         if is_wf:
             fl = [f for f in fl_wf if f in fl_curr_app_abc]
@@ -89,7 +89,6 @@ def get_feature_list(fl_wf, fl_abc, fl_curr_app_abc, fl_prev_app_abc,
             fl = fl_prev_app_abc
     else:
         fl = fl_wf if is_wf else fl_abc
-    print(f"filter={filter}, is_wf={is_wf}, fl: {len(fl)}, {fl[:5]}")
     return fl
 
 def get_cat_num_features_lists():

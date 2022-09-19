@@ -91,6 +91,7 @@ async def get_global_impact(max_feat: int = 20):
         sur le graphique.
     :return: FileResponse (fichier PNG du graphe)
     """
+    max_feat = max(min(max_feat, 30), 5)
     filepath = tmp + f"gfgi_{max_feat}.png"
     if not os.path.exists(filepath):
         plt.subplots(figsize=(10, 20))
@@ -108,11 +109,12 @@ async def graph_bivar(feature_1: str, feature_2: str):
     :return: FileResponse (fichier PNG du graphe)
     """
     # Vérifie les features et nom du fichier graphique s'il existe
-    if feature_1 in features_list and feature_2 in features_list:
+    if feature_1 in features_list and feature_2 in features_list and feature_1!=feature_2:
         f1_idx = features_list.index(feature_1)
         f2_idx = features_list.index(feature_2)
     else:
-        return FileResponse("")
+        filepath = data_path + "blank_space.png"
+        return FileResponse(filepath)
     filepath_1 = tmp + f"bivar{f1_idx}_{f2_idx}.png"
     filepath_2 = tmp + f"bivar{f2_idx}_{f1_idx}.png"
 
@@ -154,9 +156,10 @@ def get_client_score(client_id: int):
     :param client_id: int, n° d'identification du client.
     :return: CDO_score
     """
-    sample = clients_id_list.index(client_id)
-    score = clf.predict_proba(shap_values.data[sample].copy().reshape(1, -1))[:, 1][0]
-    return CDO_score(client_id=client_id, score=score)
+    if client_id in clients_id_list:
+        sample = clients_id_list.index(client_id)
+        score = clf.predict_proba(shap_values.data[sample].copy().reshape(1, -1))[:, 1][0]
+        return CDO_score(client_id=client_id, score=score)
 
 # Graphe impact local des features
 @app.get('/{client_id}/local_impact', response_class=FileResponse)
@@ -168,6 +171,10 @@ async def local_impact(client_id: int, max_feat: int = 16):
         sur le graphique.
     :return: FileResponse (fichier PNG du graphe)
     """
+    max_feat = max(min(max_feat, 30), 5)
+    if client_id not in clients_id_list:
+        filepath = data_path + "blank_space.png"
+        return FileResponse(filepath)
     filepath = tmp + f"gfli_{client_id}_{max_feat}.png"
     if not os.path.exists(filepath):
         plt.subplots(figsize=(10, 20))
@@ -192,12 +199,12 @@ def get_features_selection(client_id: int, is_wf: bool = True, filter: str = 'cu
         - 'previous': features des prêts antérieurs.
     :return: DO_feature_selection (liste)
     """
-    if is_wf == True and client_id is not None:
-        sample = clients_id_list.index(client_id)
-        df_local_shap_val = pd.DataFrame(shap_values[..., class_value].values[sample],
-                                         index=shap_values.feature_names, columns=['Shap_val'])
-        df_local_shap_val = df_local_shap_val.abs().sort_values(by='Shap_val', ascending=False)
-        fs_wf = df_local_shap_val.index.values.tolist()
+    if is_wf == True and client_id in clients_id_list:
+            sample = clients_id_list.index(client_id)
+            df_local_shap_val = pd.DataFrame(shap_values[..., class_value].values[sample],
+                                             index=shap_values.feature_names, columns=['Shap_val'])
+            df_local_shap_val = df_local_shap_val.abs().sort_values(by='Shap_val', ascending=False)
+            fs_wf = df_local_shap_val.index.values.tolist()
     else:
         fs_wf = None
     fs = get_feature_list(fs_wf, fl_abc, fl_curr_app_abc,
@@ -213,6 +220,9 @@ async def graph_feature(client_id: int, feature: str):
     :param feature: str, nom de la feature.
     :return: FileResponse (fichier PNG du graphe)
     """
+    if client_id not in clients_id_list or feature not in features_list:
+        filepath = data_path + "blank_space.png"
+        return FileResponse(filepath)
     f_idx = features_list.index(feature)
     filepath = tmp + f"feature_{client_id}_{f_idx}.png"
     if not os.path.exists(filepath):
@@ -235,7 +245,7 @@ async def graph_feature(client_id: int, feature: str):
 
 
 # Lancement de l'API par exécution du fichier python
-#import uvicorn
-#if __name__ == '__main__':
-    #uvicorn.run("api:app", reload=False)  # pour fonctionnement par défaut
+import uvicorn
+if __name__ == '__main__':
+    uvicorn.run("api:app", reload=True)  # pour fonctionnement par défaut
     #uvicorn.run("api:app", host='0.0.0.0', port=8000, reload=False)  # pour fonctionnement dans conteneur
