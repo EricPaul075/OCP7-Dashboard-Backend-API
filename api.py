@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 print('Chargements et initialisations...')
 clear_tmp()
 clf = load_clf()
-shap_values = get_shap_values(Xfile=data_path+"P7_dashboard_Xdata_10pc.csv", clf=clf)
+shap_values = get_shap_values(Xfile=data_path+"P7_dashboard_Xdata.csv", clf=clf)
 clients_id_list = load_id_list()
 features_list = shap_values.feature_names
 fl_abc = sorted(features_list)
