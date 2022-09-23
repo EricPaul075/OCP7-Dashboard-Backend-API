@@ -14,15 +14,34 @@ import pickle
 
 import re
 import gc
-import os
+import os, shutil
 
 # Variables globales
-#cwd = os.getcwd()
-#data_path = cwd + '/../data/'
 data_path = './data/'
 tmp = data_path + 'tmp/'
 if not os.path.exists(tmp):
     os.makedirs(tmp)
+
+def clear_tmp():
+    """
+    Supprime le contenu du répertoire tmp.
+    :return: dict, dictionnaire des erreurs de suppression.
+    """
+    folder = data_path + 'tmp'
+    errors = dict()
+    err_count = 0
+    for filename in os.listdir(folder):
+        file_path = os.path.join(folder, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+        except Exception as e:
+            err_count += 1
+            errors[err_count] = f"{file_path} n'a pas pu être supprimé. Raison: {e}"
+    result = {"Nombre d'erreurs": err_count, "erreurs": errors}
+    return result
 
 
 def load_id_list():

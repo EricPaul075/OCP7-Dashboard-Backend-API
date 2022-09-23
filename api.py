@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 
 # Chargement des données (fixes) de modèle, shap_values et listes de features
 print('Chargements et initialisations...')
+clear_tmp()
 clf = load_clf()
 shap_values = get_shap_values(Xfile=data_path+"P7_dashboard_Xdata_10pc.csv", clf=clf)
 clients_id_list = load_id_list()
@@ -57,9 +58,28 @@ def root():
 def home():
     """
     Message d'identification de l'API.
-    :return: dict: message explicitant l'API.
+    :return: dict: message explicitant l'API et l'auteur.
     """
-    return {"message": "API pour le dashboard d'OC P7"}
+    return {"message": "API pour le dashboard d'OC P7",
+            "auteur": "Eric TREGOAT"}
+
+# Favicon
+@app.get('/favicon.ico')
+async def favicon():
+    """
+    Définition du 'favicon'.
+    :return: fichier de l'icone
+    """
+    return FileResponse(data_path + "favicon.ico")
+
+# Clear tmp folder
+@app.get('/clear_cache')
+async def clear_cache():
+    """
+    Efface le cache des fichiers graphiques.
+    :return:
+    """
+    return clear_tmp()
 
 # Liste des id des clients
 @app.get("/clients_list", response_model=GDO_client_list)
